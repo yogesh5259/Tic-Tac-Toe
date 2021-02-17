@@ -39,7 +39,11 @@ class TicTacToe {
                         input[0].equals("start") && input[1].equals("user") && input[2].equals("user") ||
                         input[0].equals("start") && input[1].equals("user") && input[2].equals("medium") ||
                         input[0].equals("start") && input[1].equals("medium") && input[2].equals("medium") ||
-                        input[0].equals("start") && input[1].equals("hard") && input[2].equals("user")
+                        input[0].equals("start") && input[1].equals("hard") && input[2].equals("user") ||
+                        input[0].equals("start") && input[1].equals("user") && input[2].equals("hard") ||
+                        input[0].equals("start") && input[1].equals("hard") && input[2].equals("hard")
+
+
 
 
                 ) {
@@ -74,6 +78,12 @@ class TicTacToe {
                         scanner.nextLine();
                     } else if(input[0].equals("start") && input[1].equals("hard") && input[2].equals("user")){
                         hardToUser();
+                        scanner.nextLine();
+                    } else if(input[0].equals("start") && input[1].equals("user") && input[2].equals("hard")){
+                        userToHard();
+                        scanner.nextLine();
+                    }else if(input[0].equals("start") && input[1].equals("hard") && input[2].equals("hard")){
+                        hardToHard();
                         scanner.nextLine();
                     }
                     System.out.print("Input command: ");
@@ -561,6 +571,49 @@ class TicTacToe {
             }
         }
     }
+    public void userToHard(){
+        boolean round = false;
+        while (true) {
+            char c = checkForWin();
+            if (c == 'X') {
+                System.out.println("X wins");
+                break;
+            } else if (c == 'O') {
+                System.out.println("O wins");
+                break;
+            } else if (c == 'N') {
+                System.out.println("Draw");
+                break;
+            }
+            if (round) {
+                System.out.println("Making move level \"Hard\"");
+                copmuterPlay("hard");
+                round = false;
+            } else {
+                userPlay();
+                round = true;
+            }
+        }
+    }
+
+    public void hardToHard(){
+        while (true) {
+            char c = checkForWin();
+            if (c == 'X') {
+                System.out.println("X wins");
+                break;
+            } else if (c == 'O') {
+                System.out.println("O wins");
+                break;
+            } else if (c == 'N') {
+                System.out.println("Draw");
+                break;
+            }
+                System.out.println("Making move level \"Hard\"");
+                copmuterPlay("hard");
+
+        }
+    }
 
 
 
@@ -716,16 +769,22 @@ class TicTacToe {
         {
             for (int j = 0; j < 3; j++)
             {
+                // Check if cell is empty
                 if (board[i][j] == '\u0000')
                 {
+                    // Make the move
                     board[i][j] = player;
 
-                    
+                    // compute evaluation function for this
+                    // move.
                     int moveVal = minimax(board, 0, false);
 
+                    // Undo the move
                     board[i][j] = '\u0000';
 
-                    
+                    // If the value of the current move is
+                    // more than the best value, then update
+                    // best/
                     if (moveVal > bestVal)
                     {
                         bestMove.row = i;
