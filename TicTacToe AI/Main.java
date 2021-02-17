@@ -17,7 +17,14 @@ class TicTacToe {
     private static char[][] array = new char[3][3];
     private static int countO = 0;
     private static int countX = 0;
-    private int y;
+    static char player = 'X', opponent = 'O';
+
+    static class Move
+    {
+        int row, col;
+    };
+
+
 
     public void play() {
         System.out.print("Input command: ");
@@ -31,7 +38,9 @@ class TicTacToe {
                         input[0].equals("start") && input[1].equals("easy") && input[2].equals("user") ||
                         input[0].equals("start") && input[1].equals("user") && input[2].equals("user") ||
                         input[0].equals("start") && input[1].equals("user") && input[2].equals("medium") ||
-                        input[0].equals("start") && input[1].equals("medium") && input[2].equals("medium")
+                        input[0].equals("start") && input[1].equals("medium") && input[2].equals("medium") ||
+                        input[0].equals("start") && input[1].equals("hard") && input[2].equals("user")
+
 
                 ) {
 
@@ -62,6 +71,9 @@ class TicTacToe {
                         scanner.nextLine();
                     } else if(input[0].equals("start") && input[1].equals("medium") && input[2].equals("medium")){
                         mediumToMedium();
+                        scanner.nextLine();
+                    } else if(input[0].equals("start") && input[1].equals("hard") && input[2].equals("user")){
+                        hardToUser();
                         scanner.nextLine();
                     }
                     System.out.print("Input command: ");
@@ -175,8 +187,12 @@ class TicTacToe {
             if (temp[0] == 5) {
                 temp = generateRandom();
             }
+        } else if(name.equals("hard")){
 
-
+            Move move = findBestMove(array);
+            System.out.println("Best moves: " + move.row + " " + move.col);
+            temp[0] = move.row + 1;
+            temp[1] = move.col + 1;
         }
         //System.out.println("Passing x: " + temp[0] + " pasing y: " + temp[1]);
         plotElement(temp[0], temp[1]);
@@ -300,7 +316,7 @@ class TicTacToe {
         }
     }
 
-    private void mediumToUser() {
+    public void mediumToUser() {
         boolean round = false;
         while (true) {
             char c = checkForWin();
@@ -325,7 +341,7 @@ class TicTacToe {
         }
     }
 
-    private int[] checkPossibleMove() {
+    public int[] checkPossibleMove() {
         int[] temp = new int[2];
         //System.out.println("check possible called....");
         for (int i = 0; i < 3; i++) {
@@ -413,7 +429,7 @@ class TicTacToe {
         return temp;
     }
 
-    private int[] OWin() {
+    public int[] OWin() {
         int[] temp = new int[2];
         //System.out.println("check possible called....");
         for (int i = 0; i < 3; i++) {
@@ -501,7 +517,7 @@ class TicTacToe {
         return temp;
     }
 
-    private void mediumToMedium() {
+    public void mediumToMedium() {
         while (true) {
             char c = checkForWin();
             if (c == 'X') {
@@ -520,5 +536,209 @@ class TicTacToe {
         }
     }
 
+
+    public void hardToUser(){
+        boolean round = true;
+        while (true) {
+            char c = checkForWin();
+            if (c == 'X') {
+                System.out.println("X wins");
+                break;
+            } else if (c == 'O') {
+                System.out.println("O wins");
+                break;
+            } else if (c == 'N') {
+                System.out.println("Draw");
+                break;
+            }
+            if (round) {
+                System.out.println("Making move level \"Hard\"");
+                copmuterPlay("hard");
+                round = false;
+            } else {
+                userPlay();
+                round = true;
+            }
+        }
+    }
+
+
+
+    public Boolean isMovesLeft(char[][] board)
+    {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i][j] == ' ')
+                    return true;
+        return false;
+    }
+
+
+    // Evaluation for AI minimax
+    public int evaluate(char b[][])
+    {
+        // Checking for Rows for X or O victory.
+        for (int row = 0; row < 3; row++)
+        {
+            if (b[row][0] == b[row][1] && b[row][1] == b[row][2])
+            {
+                if (b[row][0] == 'X')
+                    return +10;
+                else if (b[row][0] == 'O')
+                    return -10;
+            }
+        }
+
+        // Checking for Columns for X or O victory.
+        for (int col = 0; col < 3; col++)
+        {
+            if (b[0][col] == b[1][col] && b[1][col] == b[2][col])
+            {
+                if (b[0][col] == 'X')
+                    return +10;
+                else if (b[0][col] == 'O')
+                    return -10;
+            }
+        }
+
+        // Checking for Diagonals for X or O victory.
+        if (b[0][0] == b[1][1] && b[1][1] == b[2][2])
+        {
+            if (b[0][0] == 'X')
+                return +10;
+            else if (b[0][0] == 'O')
+                return -10;
+        }
+        if (b[0][2] == b[1][1] && b[1][1] == b[2][0])
+        {
+            if (b[0][2] == 'X')
+                return +10;
+            else if (b[0][2] == 'O')
+                return -10;
+        }
+
+        // Else if none of them have won then return 0
+        return 0;
+    }
+
+    //minimax algo
+    public int minimax(char[][] board,
+                       int depth, Boolean isMax)
+    {
+        int score = evaluate(board);
+
+        // If Maximizer has won the game
+        // return his/her evaluated score
+        if (score == 10)
+            return score;
+
+        // If Minimizer has won the game
+        // return his/her evaluated score
+        if (score == -10)
+            return score;
+
+        // If there are no more moves and
+        // no winner then it is a tie
+        if (!isMovesLeft(board))
+            return 0;
+
+        // If this maximizer's move
+        if (isMax)
+        {
+            int best = -1000;
+
+            // Traverse all cells
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    // Check if cell is empty
+                    if (board[i][j]=='\u0000')
+                    {
+                        // Make the move
+                        board[i][j] = player;
+
+                        // Call minimax recursively and choose
+                        // the maximum value
+                        best = Math.max(best, minimax(board,
+                                depth + 1, !isMax));
+
+                        // Undo the move
+                        board[i][j] = '\u0000';
+                    }
+                }
+            }
+            return best;
+        }
+
+        // If this minimizer's move
+        else
+        {
+            int best = 1000;
+
+            // Traverse all cells
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    // Check if cell is empty
+                    if (board[i][j] == '\u0000')
+                    {
+                        // Make the move
+                        board[i][j] = opponent;
+
+                        // Call minimax recursively and choose
+                        // the minimum value
+                        best = Math.min(best, minimax(board,
+                                depth + 1, !isMax));
+
+                        // Undo the move
+                        board[i][j] = '\u0000';
+                    }
+                }
+            }
+            return best;
+        }
+    }
+
+    //each step find best move
+    public Move findBestMove(char[][] board)
+    {
+        int bestVal = -1000;
+        Move bestMove = new Move();
+        bestMove.row = -1;
+        bestMove.col = -1;
+
+        // Traverse all cells, evaluate minimax function
+        // for all empty cells. And return the cell
+        // with optimal value.
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[i][j] == '\u0000')
+                {
+                    board[i][j] = player;
+
+                    
+                    int moveVal = minimax(board, 0, false);
+
+                    board[i][j] = '\u0000';
+
+                    
+                    if (moveVal > bestVal)
+                    {
+                        bestMove.row = i;
+                        bestMove.col = j;
+                        bestVal = moveVal;
+                    }
+                }
+            }
+        }
+
+
+
+        return bestMove;
+    }
 
 }
